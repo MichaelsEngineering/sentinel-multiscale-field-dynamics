@@ -32,7 +32,8 @@ equivariant = [
 [project.scripts]
 gpd-test = "src.gpd_test.cli:main"
 gpd-test-recover = "src.scripts.check_env:recover_main"
-sentinel-sim = "src.gpd_test.cli:main"
+sentinel = "src.sentinel_core.cli.app:main"
+sentinel-sim = "src.sentinel_core.cli.app:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -53,6 +54,11 @@ dev = [
 [tool.pytest.ini_options]
 addopts = "-q"
 testpaths = ["tests"]
+markers = [
+    "smoke: fast CLI and end-to-end sanity checks",
+    "regression: seeded regression and metric envelope checks",
+    "physics: invariant and conservation-oriented validation checks",
+]
 
 [tool.ruff]
 line-length = 100

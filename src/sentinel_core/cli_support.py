@@ -4,6 +4,7 @@ import json
 
 from .config import GeometryConfig, TaskConfig, TrainingConfig
 from .core import build_task, run_rollout, train_closure
+from .evaluators.core import evaluate_grid_rollout
 from .geometry import EquivariantGeometryState, GraphGeometryState
 from .operators import EquivariantOperator, GraphOperator
 from .problems import default_grid_task_config
@@ -25,6 +26,7 @@ def theory_mapping_report() -> str:
 def smoke_grid_report(steps: int = 3) -> str:
     task = build_task(default_grid_task_config())
     result = run_rollout(task, steps=steps)
+    evaluation = evaluate_grid_rollout(result.trajectory)
     payload = {
         "task": task.name,
         "geometry": task.config.geometry.kind,
@@ -34,6 +36,7 @@ def smoke_grid_report(steps: int = 3) -> str:
         "integrator": task.config.integrator.kind,
         "steps": steps,
         "diagnostics": result.diagnostics,
+        "invariants": evaluation.invariants,
     }
     return json.dumps(payload, indent=2, sort_keys=True)
 
@@ -46,7 +49,11 @@ def training_report() -> str:
 
 
 def graph_report() -> str:
-    config = TaskConfig(name="graph_scaffold", geometry=GeometryConfig(kind="graph", resolution=6))
+    config = TaskConfig(
+        name="graph_scaffold",
+        schema_version="1",
+        geometry=GeometryConfig(kind="graph", resolution=6),
+    )
     task = build_task(config)
     assert isinstance(task.geometry, GraphGeometryState)
     assert isinstance(task.operator, GraphOperator)
@@ -66,7 +73,9 @@ def graph_report() -> str:
 
 def equivariant_report() -> str:
     config = TaskConfig(
-        name="equivariant_scaffold", geometry=GeometryConfig(kind="equivariant", resolution=4)
+        name="equivariant_scaffold",
+        schema_version="1",
+        geometry=GeometryConfig(kind="equivariant", resolution=4),
     )
     task = build_task(config)
     assert isinstance(task.geometry, EquivariantGeometryState)

@@ -1,42 +1,54 @@
-# Repository Workflow Guide
+# AGENTS.md
 
-This repository is a GPD-compatible simulation workspace. Preserve the existing research and workflow structure under `.gpd/`, `.codex/`, `paper_runs/`, and the support tooling in `src/scripts/` while editing the simulation package under `src/sentinel_core/` and tests under `tests/`.
+This repository is a deterministic research-and-systems workspace for multiscale field dynamics.
 
-## Required local workflow
+## Supported environment
 
-Use the repo-local environment and tools. Prefer `uv` and `.venv`-backed commands over assuming globally installed Python tooling.
+Primary target:
+- Linux
+- Windows only through WSL 2 with Ubuntu
 
-Canonical setup:
+Assume Linux semantics for paths, scripts, tooling, and examples. If the user is on Windows, prefer WSL Ubuntu commands and file operations over native Windows shells.
 
-```bash
-uv sync --dev
-```
+## Public command surface
 
-Before finishing any code change, run:
+Use cross-platform entrypoints first:
+- `uv sync --dev`
+- `uv run sentinel ...`
+- `cmake --preset ...`
+- `ctest --preset ...`
 
-```bash
-make format
-make check
-```
+Do not rely on shell activation in examples or automation.
 
-The `Makefile` is expected to run through the repo environment via `uv run`, so these targets should work from a fresh shell without manual activation.
+## Workflow rules
 
-The `make check` target intentionally includes a non-mutating Ruff format check. If it fails with output like `Would reformat: ...`, that means files were edited without being formatted first. Treat this as a workflow issue, not a lint policy bug:
+- Treat `Makefile` as a Linux convenience layer and CI helper, not the only supported interface.
+- Preserve the current validated scope: the grid turbulence path is executable; graph and equivariant modes are scaffold-level.
+- Every tracked run should write artifacts under `runs/` with an explicit seed and config hash.
+- Keep docs, configs, and tests aligned when changing the command surface.
+- Prefer editing from Linux or WSL Ubuntu only. Do not treat native Windows Codex execution as a safe default workflow for this repo.
+- If the worktree shows broad text-file churn and `git` warns about `CRLF`/`LF`, treat it as a likely Windows-only file issue before assuming the content changed intentionally.
+- When Windows-specific file issues appear, update docs and guidance toward WSL 2 usage rather than expanding native Windows support.
 
-```bash
-make format
-make check
-```
+## Editing focus
 
-For partial edits, it is acceptable to format only the changed files first and then run the full gate:
+- Core Python package: `src/sentinel_core/`
+- Research/public docs: `research/` and `docs/`
+- Native scaffolding: `native/c/`
+- Cross-platform wrappers: `scripts/dev.ps1`, `scripts/dev.sh`
 
-```bash
-.venv/bin/ruff format <changed files>
-make check
-```
+## Windows-only file issue guidance
 
-## Editing guidance
+- Files tracked with LF in git should stay LF-normalized in the repository.
+- Native Windows Codex sessions can rewrite working-tree files as CRLF and create noisy diffs in docs, YAML, workflow files, and Python sources.
+- If this occurs, do not normalize the repo around native Windows behavior. Preserve Linux/WSL-first expectations in documentation and automation.
 
-- Apply the same formatting workflow to `src/sentinel_core/`, `tests/`, and the existing GPD/support code.
-- Do not edit generated or workflow state directories as part of routine code fixes unless the task explicitly requires it.
-- Keep `Makefile` semantics intact unless there is a real tooling problem; `ruff format --check` should remain part of the gate.
+## Validation
+
+Before finishing code changes, prefer:
+- `uv run ruff format src tests`
+- `uv run ruff check src tests`
+- `uv run mypy src tests`
+- `uv run pytest -q`
+
+On Linux, `make format` and `make check` mirror the same workflow.
