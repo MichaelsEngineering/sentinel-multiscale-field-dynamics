@@ -1,0 +1,24 @@
+schema_version: "1"
+name: grid_turbulence
+metadata:
+  validated_scope: grid_only
+geometry:
+  kind: grid
+  resolution: 12
+  domain_size: 6.283185307179586
+  channels:
+    - vorticity
+    - velocity
+  boundary: periodic
+operator:
+  family: regular_grid_differential
+  viscosity: 0.03
+closure:
+  kind: neural_operator_surrogate
+  history: 2
+  latent_width: 16
+integrator:
+  kind: structure_preserving_euler
+  dt: 0.04
+  projection: mean_free
+  max_stable_dt: 0.08

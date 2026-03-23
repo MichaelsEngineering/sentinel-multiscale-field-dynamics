@@ -7,6 +7,7 @@ from ..geometry.grid import GridGeometryState, make_turbulence_seed
 def default_grid_task_config(resolution: int = 12) -> TaskConfig:
     return TaskConfig(
         name="grid_turbulence",
+        schema_version="1",
         geometry=GeometryConfig(
             kind="grid", resolution=resolution, channels=("vorticity", "velocity")
         ),

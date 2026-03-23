@@ -32,6 +32,8 @@ def theory_mapping() -> str:
             "operator class -> differential stencil / autoregressive message passing / equivariant tensor map",
             "closure -> neuraloperator-style residual / graph residual head / equivariant residual head",
             "integrator -> SciML structure-preserving rollout",
+            "controller -> bounded intervention and invariant-aware correction",
+            "evaluator -> invariant dashboards, benchmark reports, and traces",
             "theory bridge -> Brandstetter geometric deep learning",
         ]
     )

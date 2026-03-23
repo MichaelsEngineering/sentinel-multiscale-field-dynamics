@@ -1,0 +1,7 @@
+schema_version: "1"
+name: turbulence_horizon
+task_config: configs/tasks/turbulence2d_baseline.yaml
+steps: 8
+thresholds:
+  energy_drift: 5.0
+  mean_value_abs: 1.0e-8

@@ -1,0 +1,12 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "native-debug-local",
+      "inherits": "native-debug",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc"
+      }
+    }
+  ]
+}

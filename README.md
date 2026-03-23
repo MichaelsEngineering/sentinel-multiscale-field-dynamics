@@ -1,98 +1,76 @@
-# sentinel-multiscale-field-dynamics
+# Sentinel Multiscale Field Dynamics
 
-This repository is a physics-first research program on multiscale turbulence and plasma dynamics, organized around the chain:
+Sentinel Multiscale Field Dynamics is a deterministic research workspace for multiscale physics, learned dynamics, and intervention-aware control. The validated executable path is the 2D periodic grid turbulence baseline.
 
-`geometry -> symmetry -> operator class -> closure -> integrator`
+## Status
 
-It combines a GPD-managed research map with a simulation-first Python package. The first executable vertical slice is periodic 2D grid turbulence with structure-preserving rollout diagnostics. GraphCast-inspired graph forecasting and e3nn-style equivariant states remain scaffold-level extensions on the same task interface.
+Work in progress. The repository is under active development and the current validated path is still narrow.
 
-## Research Program
+Current focus:
 
-The active program decomposes multiscale field dynamics into falsifiable subproblems across:
+- keep the 2D grid turbulence baseline deterministic and reproducible
+- stabilize the `sentinel` command surface and supporting docs
+- expand evaluation, reporting, and tracked-run artifacts under `runs/`
+- mature the native Linux runtime scaffolding under `native/c/`
+- keep graph and equivariant paths clearly marked as scaffold-level until they are validated
 
-- Fluid turbulence
-- Plasma / MHD
-- Cross-scale surrogate modeling
-- Invariant-preserving learned dynamics
-- Long-horizon rollout stability
-- Closure modeling for unresolved scales
+## Supported Environment
 
-Tracked failure modes:
+Primary development and execution target:
 
-- Energy drift
-- Instability in long rollouts
-- Failure across scale transfer
-- Violation of conservation constraints
-- Weakness under regime shift
+- Linux
+- Windows through WSL 2 with Ubuntu
 
-## Sources Of Truth
+This repository should be treated as Linux-first. If you are on Windows, run commands from the Ubuntu side of WSL 2, not from native Windows shells.
 
-- [PLAN.md](/home/qol/sentinel-multiscale-field-dynamics/PLAN.md) is the top-level program statement.
-- [.gpd/PROJECT.md](/home/qol/sentinel-multiscale-field-dynamics/.gpd/PROJECT.md), [.gpd/REQUIREMENTS.md](/home/qol/sentinel-multiscale-field-dynamics/.gpd/REQUIREMENTS.md), and [.gpd/ROADMAP.md](/home/qol/sentinel-multiscale-field-dynamics/.gpd/ROADMAP.md) define the active GPD contract.
-- [.gpd/research-map/PROJECT_MAP.md](/home/qol/sentinel-multiscale-field-dynamics/.gpd/research-map/PROJECT_MAP.md), [.gpd/research-map/VALIDATION.md](/home/qol/sentinel-multiscale-field-dynamics/.gpd/research-map/VALIDATION.md), and [.gpd/research-map/PAPER_OUTLINES.md](/home/qol/sentinel-multiscale-field-dynamics/.gpd/research-map/PAPER_OUTLINES.md) hold the current project map, verification strategy, and paper arcs.
-- [docs/architecture.md](/home/qol/sentinel-multiscale-field-dynamics/docs/architecture.md) is the architecture report for the simulation package and theory mapping.
+Current validation has been done on Linux through WSL 2 Ubuntu. Native Linux users, including Red Hat or RHEL-derived distributions, should expect the same command surface but may need different system-package or tool-install steps for their distro.
 
-## Repository Layout
+Native Windows execution is not a supported primary workflow for Codex or day-to-day repo edits. Running Codex outside WSL 2 can introduce Windows-only file damage such as:
 
-- `src/sentinel_core/` contains the simulation package and theory-chain abstractions.
-- `src/scripts/` keeps the environment, recovery, and security tooling.
-- `.gpd/` contains the active research-program state, requirements, roadmap, and research-map artifacts.
-- `.codex/` contains vendored GPD workflows, references, and agent configuration.
-- `paper_runs/` preserves earlier paper-production artifacts as historical context, not the active project contract.
+- CRLF line-ending churn in tracked files that are stored as LF in git
+- noisy diffs across docs, config, and workflow files
+- shell-path and script mismatches against the Linux-oriented command surface
 
-## Working Model
+## Quick Start
 
-- Geometry selects the state layout and conserved quantities.
-- Symmetry is derived from geometry and constrains the admissible operator family.
-- Operator class determines the numerical backbone and learned closure interface.
-- Closure provides data-driven correction terms without bypassing the resolved dynamics.
-- Integrator owns rollout stability and structure-preserving diagnostics.
-
-## Install
+From Linux or WSL Ubuntu:
 
 ```bash
 uv sync --dev
-uv sync --dev --extra sim
-uv sync --dev --extra sim --extra graph --extra equivariant
+uv run sentinel report architecture
+uv run sentinel smoke grid --config configs/tasks/turbulence2d_baseline.yaml
+uv run sentinel run rollout --config configs/tasks/turbulence2d_baseline.yaml --seed 7
+uv run sentinel bench turbulence2d --suite configs/benchmarks/turbulence_horizon.yaml --seed 7
 ```
 
-## Workflow
+Do not rely on shell activation in examples or automation.
 
-Use repo-local tools. The expected local loop is:
+## Command Surface
 
-```bash
-make format
-make check
-```
+Use these entrypoints first:
 
-For direct invocation, prefer `.venv` or `uv run` commands over assuming globally installed tools.
+- `uv sync --dev`
+- `uv run sentinel ...`
+- `cmake --preset ...`
+- `ctest --preset ...`
 
-## Run
+`Makefile` is a Linux convenience layer and CI helper. It is not the only supported interface.
 
-```bash
-uv run gpd-test architecture
-uv run gpd-test file-tree
-uv run gpd-test smoke-grid
-uv run gpd-test theory-mapping
-.venv/bin/pytest -q
-```
+## Validated Scope
 
-## Notes On Optional Stacks
+- Validated: periodic 2D grid turbulence rollout with deterministic config-driven execution and invariant summaries
+- Scaffolded only: graph and equivariant modes
+- Planned but not yet validated: learned closures, controller layers, native kernel execution, telemetry streaming
 
-- Base installs stay lightweight for GPD and repo-policy workflows.
-- `sim` is the regular-grid operator-learning stack.
-- `graph` is reserved for GraphCast-style graph/mesh experimentation.
-- `equivariant` is reserved for e3nn-style Euclidean-equivariant modules.
+## Reproducibility Rules
 
-## Referenced Software
+- Every tracked run must use an explicit seed.
+- Every tracked run must write artifacts under `runs/`.
+- Tracked outputs should include a config hash plus run metadata such as `run_manifest.json`, `run_summary.json`, and `trace.jsonl`.
 
-```bibtex
-@software{physical_superintelligence_2026_gpd,
-  author = {{Physical Superintelligence PBC}},
-  title = {Get Physics Done (GPD)},
-  version = {1.1.0},
-  year = {2026},
-  url = {https://github.com/psi-oss/get-physics-done},
-  license = {Apache-2.0}
-}
-```
+## Repository Areas
+
+- Core package: `src/sentinel_core/`
+- Research and docs: `research/` and `docs/`
+- Native scaffolding: `native/c/`
+- Wrapper scripts: `scripts/dev.sh` and `scripts/dev.ps1`
