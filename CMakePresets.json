@@ -2,7 +2,7 @@
   "version": 3,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 25,
+    "minor": 22,
     "patch": 0
   },
   "configurePresets": [
@@ -10,8 +10,7 @@
       "name": "native-debug",
       "displayName": "Native Debug",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/native/c/build/debug",
-      "sourceDir": "${sourceDir}/native/c",
+      "binaryDir": "${sourceDir}/build/native/debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
@@ -20,8 +19,7 @@
       "name": "native-release",
       "displayName": "Native Release",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/native/c/build/release",
-      "sourceDir": "${sourceDir}/native/c",
+      "binaryDir": "${sourceDir}/build/native/release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }

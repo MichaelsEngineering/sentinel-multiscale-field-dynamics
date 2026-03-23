@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.22)
 project(sentinel_native C)
 
 add_library(sentinel_native STATIC src/threaded_stencil.c)
