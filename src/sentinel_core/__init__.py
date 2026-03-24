@@ -21,23 +21,30 @@ from .core import (
     run_rollout,
     train_closure,
 )
+from .data import DatasetManifest, DatasetRecord, DatasetState
 from .evaluators.core import EvaluationReport, InvariantReport, evaluate_grid_rollout
 from .interfaces import FieldState, RunManifest, StepContext
+from .operator_adapter import OperatorModel, State
 from .reporting import describe_architecture, package_file_tree, theory_mapping
 
 __all__ = [
     "AbstainingController",
     "ClosureConfig",
     "ControlAction",
+    "DatasetManifest",
+    "DatasetRecord",
+    "DatasetState",
     "EvaluationReport",
     "FieldState",
     "GeometryConfig",
     "IntegratorConfig",
     "InvariantReport",
+    "OperatorModel",
     "OperatorConfig",
     "RolloutResult",
     "RunManifest",
     "SimulationTask",
+    "State",
     "StepContext",
     "SymmetryConfig",
     "TaskConfig",

@@ -12,6 +12,7 @@ import yaml
 
 from ..config import load_task_config, task_config_to_dict
 from ..core import build_task, run_rollout
+from ..data import ingest_jhtdb_dataset, summarize_jsonl, validate_dataset_artifacts
 from ..evaluators.core import EvaluationReport, evaluate_grid_rollout
 from ..interfaces import RunManifest
 from ..reporting import describe_architecture, theory_mapping
@@ -21,6 +22,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_TASK_CONFIG = REPO_ROOT / "configs" / "tasks" / "turbulence2d_baseline.yaml"
 DEFAULT_BENCHMARK_CONFIG = REPO_ROOT / "configs" / "benchmarks" / "turbulence_horizon.yaml"
 RUNS_ROOT = REPO_ROOT / "runs"
+DATA_ROOT = REPO_ROOT / "data" / "jhtdb"
 
 app = typer.Typer(add_completion=False, no_args_is_help=True)
 smoke_app = typer.Typer(add_completion=False, no_args_is_help=True)
@@ -31,6 +33,7 @@ report_app = typer.Typer(add_completion=False, no_args_is_help=True)
 native_app = typer.Typer(add_completion=False, no_args_is_help=True)
 trace_app = typer.Typer(add_completion=False, no_args_is_help=True)
 data_app = typer.Typer(add_completion=False, no_args_is_help=True)
+ingest_app = typer.Typer(add_completion=False, no_args_is_help=True)
 
 
 def _json_hash(payload: dict[str, object]) -> str:
@@ -237,6 +240,46 @@ def trace_tail(source: str = typer.Option(...)) -> None:
     typer.echo(json.dumps({"source": source, "status": "tail_not_implemented_in_phase0"}, indent=2))
 
 
+@ingest_app.command("jhtdb")
+def data_ingest_jhtdb(
+    url: str = typer.Option(..., help="REST-style JHTDB query URL returning binary float32 data."),
+    dataset: str = typer.Option("isotropic1024coarse"),
+    time: float = typer.Option(0.1),
+    nx: int = typer.Option(32, min=1),
+    ny: int = typer.Option(32, min=1),
+    nz: int = typer.Option(32, min=1),
+    channels: int = typer.Option(3, min=1),
+    chunk_size: int = typer.Option(32, min=1),
+    output_root: Path = typer.Option(DATA_ROOT, file_okay=False, dir_okay=True),
+) -> None:
+    summary = ingest_jhtdb_dataset(
+        url=url,
+        dataset=dataset,
+        time=time,
+        shape=(nx, ny, nz, channels),
+        chunk_size=chunk_size,
+        output_root=output_root,
+    )
+    typer.echo(json.dumps(summary, indent=2, sort_keys=True))
+
+
+@data_app.command("validate")
+def data_validate(
+    manifest: Path = typer.Option(..., exists=True, dir_okay=False),
+    data: Path = typer.Option(..., exists=True, dir_okay=False),
+) -> None:
+    result = validate_dataset_artifacts(manifest, data)
+    if not result["valid"]:
+        typer.echo(json.dumps(result, indent=2, sort_keys=True))
+        raise typer.Exit(code=1)
+    typer.echo(json.dumps(result, indent=2, sort_keys=True))
+
+
+@data_app.command("inspect")
+def data_inspect(path: Path = typer.Option(..., exists=True, dir_okay=False)) -> None:
+    typer.echo(json.dumps({"path": str(path), **summarize_jsonl(path)}, indent=2, sort_keys=True))
+
+
 @data_app.command("manifest")
 def data_manifest_validate(
     action: str = typer.Argument(..., help="Use 'validate' for Phase 0 manifest checks."),
@@ -260,6 +303,7 @@ app.add_typer(eval_app, name="eval")
 app.add_typer(report_app, name="report")
 app.add_typer(native_app, name="native")
 app.add_typer(trace_app, name="trace")
+data_app.add_typer(ingest_app, name="ingest")
 app.add_typer(data_app, name="data")
 
 
